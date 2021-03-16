@@ -65,6 +65,9 @@ public final class SqlSessionUtils {
    *           if a transaction is active and the {@code SqlSessionFactory} is not using a
    *           {@code SpringManagedTransactionFactory}
    */
+  /**
+   *
+   * */
   public static SqlSession getSqlSession(SqlSessionFactory sessionFactory) {
     ExecutorType executorType = sessionFactory.getConfiguration().getDefaultExecutorType();
     return getSqlSession(sessionFactory, executorType, null);
@@ -88,12 +91,15 @@ public final class SqlSessionUtils {
    *           {@code SpringManagedTransactionFactory}
    * @see SpringManagedTransactionFactory
    */
+  /**
+   * Mybatis的Mapper本质就是SqlSession，Mapper的底层就是SqlSession
+   * */
   public static SqlSession getSqlSession(SqlSessionFactory sessionFactory, ExecutorType executorType,
       PersistenceExceptionTranslator exceptionTranslator) {
 
     notNull(sessionFactory, NO_SQL_SESSION_FACTORY_SPECIFIED);
     notNull(executorType, NO_EXECUTOR_TYPE_SPECIFIED);
-
+    // 看这里又用到了Spring事务同步管理器，所以集成Mybatis-Spring不能直接去获取连接，要配合事务同步管理器
     SqlSessionHolder holder = (SqlSessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
 
     SqlSession session = sessionHolder(executorType, holder);
