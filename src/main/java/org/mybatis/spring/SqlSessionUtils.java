@@ -100,13 +100,14 @@ public final class SqlSessionUtils {
     notNull(sessionFactory, NO_SQL_SESSION_FACTORY_SPECIFIED);
     notNull(executorType, NO_EXECUTOR_TYPE_SPECIFIED);
     // 看这里又用到了Spring事务同步管理器，所以集成Mybatis-Spring不能直接去获取连接，要配合事务同步管理器
+    // 这个holder在Spring事务同步管理器里面其实是个ThreadLocal的变量
     SqlSessionHolder holder = (SqlSessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
-
+    // 如果当前事务是打开的，那就可以获得当前会话（相同的会话）
     SqlSession session = sessionHolder(executorType, holder);
     if (session != null) {
       return session;
     }
-
+    // 如果没有打开事务，则构建新的会话
     LOGGER.debug(() -> "Creating a new SqlSession");
     session = sessionFactory.openSession(executorType);
 

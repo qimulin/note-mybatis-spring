@@ -42,6 +42,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 
 /**
+ * 会话模板
  * Thread safe, Spring managed, {@code SqlSession} that works with Spring transaction management to ensure that that the
  * actual SqlSession used is the one associated with the current Spring transaction. In addition, it manages the session
  * life-cycle, including closing, committing or rolling back the session as necessary based on the Spring transaction
@@ -77,7 +78,7 @@ public class SqlSessionTemplate implements SqlSession, DisposableBean {
   private final SqlSessionFactory sqlSessionFactory;
 
   private final ExecutorType executorType;
-
+  /** 代理SqlSession，主要是对具体的方法进行环绕处理 */
   private final SqlSession sqlSessionProxy;
 
   private final PersistenceExceptionTranslator exceptionTranslator;
@@ -128,6 +129,7 @@ public class SqlSessionTemplate implements SqlSession, DisposableBean {
     this.sqlSessionFactory = sqlSessionFactory;
     this.executorType = executorType;
     this.exceptionTranslator = exceptionTranslator;
+    // JDK动态代理，注意最后一个参数handler实现类类型是内部类SqlSessionInterceptor
     this.sqlSessionProxy = (SqlSession) newProxyInstance(SqlSessionFactory.class.getClassLoader(),
         new Class[] { SqlSession.class }, new SqlSessionInterceptor());
   }
@@ -225,6 +227,9 @@ public class SqlSessionTemplate implements SqlSession, DisposableBean {
   }
 
   /**
+   * 本类也实现SqlSession，
+   * 如果直接使用Mybatis的SqlSession默认实现{@link org.apache.ibatis.session.defaults.DefaultSqlSession} 的selectList的话，
+   * 它是直接调用Executor的，而这里使用的一层代理去进行调用
    * {@inheritDoc}
    */
   @Override
@@ -414,6 +419,7 @@ public class SqlSessionTemplate implements SqlSession, DisposableBean {
   }
 
   /**
+   * 会话拦截器，进行动态代理，目的就是为了对SqlSession进行拦截，可以环绕添加事务相关处理
    * Proxy needed to route MyBatis method calls to the proper SqlSession got from Spring's Transaction Manager It also
    * unwraps exceptions thrown by {@code Method#invoke(Object, Object...)} to pass a {@code PersistenceException} to the
    * {@code PersistenceExceptionTranslator}.
@@ -421,6 +427,7 @@ public class SqlSessionTemplate implements SqlSession, DisposableBean {
   private class SqlSessionInterceptor implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+      // 获取对应的SqlSession，通过SqlSessionFactory和事务
       SqlSession sqlSession = getSqlSession(SqlSessionTemplate.this.sqlSessionFactory,
           SqlSessionTemplate.this.executorType, SqlSessionTemplate.this.exceptionTranslator);
       try {
