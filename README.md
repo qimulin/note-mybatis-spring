@@ -24,6 +24,10 @@ Essentials
 * [See the snapshot docs](src/site/markdown) (Note: may contain explanation of unreleased features)
 
 # Spring集成Mybatis
+## Spring注册Mybatis的Mapper
+由[MapperScannerRegistrar](src/main/java/org/mybatis/spring/annotation/MapperScannerRegistrar.java)将BeanDefinition注册到Spring，
+然后[MapperFactoryBean](src/main/java/org/mybatis/spring/mapper/MapperFactoryBean.java)去代替Spring的Bean，从Mybatis的SqlSession中可以获取对应的Mapper实现。
+## 一级缓存失效
 那么Spring集成Mybatis的时候，为什么一级缓存会失效？其实不能说是失效了，只能说是没用上。
 原因：Spring和Mybatis集成的时候，如果没有配置事务的情况下，它每次都会去构造一个新的会话（即所用的BaseExecutor也会不一样，不是同一个对象）。
 <br>

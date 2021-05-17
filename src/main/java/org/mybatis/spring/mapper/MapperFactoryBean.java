@@ -24,6 +24,11 @@ import org.mybatis.spring.support.SqlSessionDaoSupport;
 import org.springframework.beans.factory.FactoryBean;
 
 /**
+ * MapperFactoryBean实现FactoryBean接口
+ * FactoryBean是个特殊的Bean，它可以得到两个Bean，一个是本身作为Component获得Bean，另一个重写的getObject获得的Bean。
+ * 举例：若这个实现FactoryBean的类叫ABean，而getObject方法返回B类，那么当你直接通过bean的名字从applicationContext里面取的时候就是B对象，
+ * 但是如果你名字前面加一个“&符号”，那么它就是可以去到ABean对象
+ *
  * BeanFactory that enables injection of MyBatis mapper interfaces. It can be set up with a SqlSessionFactory or a
  * pre-configured SqlSessionTemplate.
  * <p>
@@ -89,6 +94,7 @@ public class MapperFactoryBean<T> extends SqlSessionDaoSupport implements Factor
 
   /**
    * {@inheritDoc}
+   * 重写getObject获得的Bean
    */
   @Override
   public T getObject() throws Exception {

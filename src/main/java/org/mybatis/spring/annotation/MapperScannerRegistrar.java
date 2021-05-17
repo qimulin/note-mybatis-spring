@@ -38,6 +38,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
+ * 人如其名，为Mapper的扫描注册类，去实现ImportBeanDefinitionRegistrar
  * A {@link ImportBeanDefinitionRegistrar} to allow annotation configuration of MyBatis mapper scanning. Using
  * an @Enable annotation allows beans to be registered via @Component configuration, whereas implementing
  * {@code BeanDefinitionRegistryPostProcessor} will work for XML configuration.
@@ -65,6 +66,7 @@ public class MapperScannerRegistrar implements ImportBeanDefinitionRegistrar, Re
 
   /**
    * {@inheritDoc}
+   * 往Spring中注册BeanDefinition
    */
   @Override
   public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
@@ -96,7 +98,7 @@ public class MapperScannerRegistrar implements ImportBeanDefinitionRegistrar, Re
     if (!BeanNameGenerator.class.equals(generatorClass)) {
       builder.addPropertyValue("nameGenerator", BeanUtils.instantiateClass(generatorClass));
     }
-
+    // 有无自定义的factoryBean
     Class<? extends MapperFactoryBean> mapperFactoryBeanClass = annoAttrs.getClass("factoryBean");
     if (!MapperFactoryBean.class.equals(mapperFactoryBeanClass)) {
       builder.addPropertyValue("mapperFactoryBeanClass", mapperFactoryBeanClass);
